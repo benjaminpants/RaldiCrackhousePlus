@@ -23,6 +23,7 @@ namespace RaldiCrackhousePlus
         public static RaldiPlugin Instance;
         public static Dictionary<string, SoundObject> RaldiVoicelines = new Dictionary<string, SoundObject>();
         public static Dictionary<string, SoundObject> MorshuVoicelines = new Dictionary<string, SoundObject>();
+        public static SoundObject gunShoot;
         public static WeightedSoundObject[] jumpscareSounds;
         public static List<Sprite> RaldiDance = new List<Sprite>(); //oh god.
         public static List<Sprite> MorshuSprites = new List<Sprite>(); //lamp oil, rope? bombs
@@ -70,6 +71,8 @@ namespace RaldiCrackhousePlus
                     weight = 50
                 }
             };
+
+            gunShoot = ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "shoot.mp3"), "Vfx_Shoot", SoundType.Effect, Color.white);
 
             RaldiDrip = AssetManager.SpriteFromTexture2D(AssetManager.TextureFromMod(this, "Sprites", "Raldi_Drip.png"), Vector2.one / 2f, 32f);
 
@@ -228,6 +231,11 @@ namespace RaldiCrackhousePlus
                 audIntro.SetValue(x, gwIntro);
                 audSweep.SetValue(x, gwSweep);
                 speed.SetValue(x,((float)speed.GetValue(x)) / 5f);
+            });
+            Resources.FindObjectsOfTypeAll<Beans>().Do(x =>
+            {
+                x.ReflectionSetVariable("audSpit", RaldiPlugin.gunShoot);
+                //x.gum.ReflectionSetVariable("speed", ((float)x.gum.ReflectionGetVariable("speed")) * 2f);
             });
             AssetManager.ReplaceAllTexturesFromFolder(Path.Combine(AssetManager.GetModPath(RaldiPlugin.Instance), "TextureReplacements"));
             //Graphics.CopyTexture(AssetManager.TextureFromMod(RaldiPlugin.Instance, "test.png"), Resources.FindObjectsOfTypeAll<Texture2D>().Where(x => x.name == "Tubes (3)").First());
