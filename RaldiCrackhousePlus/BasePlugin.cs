@@ -22,8 +22,11 @@ namespace RaldiCrackhousePlus
         internal static ManualLogSource Log;
         public static RaldiPlugin Instance;
         public static Dictionary<string, SoundObject> RaldiVoicelines = new Dictionary<string, SoundObject>();
+        public static Dictionary<string, SoundObject> MorshuVoicelines = new Dictionary<string, SoundObject>();
         public static WeightedSoundObject[] jumpscareSounds;
         public static List<Sprite> RaldiDance = new List<Sprite>(); //oh god.
+        public static List<Sprite> MorshuSprites = new List<Sprite>(); //lamp oil, rope? bombs
+        public static List<Sprite> MorshuSpritesReject = new List<Sprite>(); //MMMM Richer!
         //public static List<Sprite> RaldiSlap = new List<Sprite>();
         public static Sprite RaldiDrip;
         public static LoopingSoundObject CrackMusic;
@@ -95,6 +98,17 @@ namespace RaldiCrackhousePlus
             {
                 RaldiDance.Add(AssetManager.SpriteFromTexture2D(AssetManager.TextureFromMod(this, "Sprites", "RaldiDance", String.Format("frame_{0}_delay-0.07s.png",i.ToString("000"))),Vector2.one / 2f, 32f));
             }
+            for (int i = 0; i < 88; i++)
+            {
+                MorshuSprites.Add(AssetManager.SpriteFromTexture2D(AssetManager.TextureFromMod(this, "Sprites", "Morshu", "Intro", String.Format("Frame {0}.png", (i + 1).ToString())), Vector2.one / 2f, 1f));
+            }
+            for (int i = 0; i < 70; i++)
+            {
+                MorshuSpritesReject.Add(AssetManager.SpriteFromTexture2D(AssetManager.TextureFromMod(this, "Sprites", "Morshu", "Reject", String.Format("Frame {0}.png", (i + 1).ToString())), Vector2.one / 2f, 1f));
+            }
+            MorshuVoicelines.Add("intro", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "morshustore.wav"), "Vfx_Morshu_Intro", SoundType.Voice, new Color(220f/255f,67/255f,16/255f)));
+            MorshuVoicelines.Add("reject", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "morshureject.wav"), "Vfx_Morshu_MmmmRicher", SoundType.Voice, new Color(220f / 255f, 67 / 255f, 16 / 255f)));
+            MorshuVoicelines.Add("mmm", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "morshummm.wav"), "Vfx_Morshu_Mmmm", SoundType.Voice, new Color(220f / 255f, 67 / 255f, 16 / 255f)));
             /*for (int i = 0; i < 5; i++)
             {
                 RaldiSlap.Add(AssetManager.SpriteFromTexture2D(AssetManager.TextureFromMod(this, "Sprites", String.Format("Raldi_Slap_{0}.png", i.ToString("0"))), Vector2.one / 2f, 32f));
@@ -204,7 +218,6 @@ namespace RaldiCrackhousePlus
             {
                 RaldiPlugin.TransformIntoRaldi(Baldis[i]);
             }
-            Sprite gottaWeep = AssetManager.SpriteFromTexture2D(AssetManager.TextureFromMod(RaldiPlugin.Instance, "Sprites", "GottaWeep.png"),Vector2.one / 2f, 26f);
             FieldInfo speed = AccessTools.Field(typeof(GottaSweep),"speed");
             FieldInfo audIntro = AccessTools.Field(typeof(GottaSweep), "audIntro");
             FieldInfo audSweep = AccessTools.Field(typeof(GottaSweep), "audSweep");
@@ -212,7 +225,6 @@ namespace RaldiCrackhousePlus
             SoundObject gwSweep = ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(RaldiPlugin.Instance, "Sounds", "gw_intro.mp3"), "Vfx_GottaWeep_Sweep", SoundType.Voice, Color.gray);
             Resources.FindObjectsOfTypeAll<GottaSweep>().Do(x =>
             {
-                x.spriteRenderer[0].sprite = gottaWeep;
                 audIntro.SetValue(x, gwIntro);
                 audSweep.SetValue(x, gwSweep);
                 speed.SetValue(x,((float)speed.GetValue(x)) / 5f);
