@@ -22,7 +22,9 @@ namespace RaldiCrackhousePlus
         internal static ManualLogSource Log;
         public static RaldiPlugin Instance;
         public static Dictionary<string, SoundObject> RaldiVoicelines = new Dictionary<string, SoundObject>();
+        public static Dictionary<string, SoundObject> ChipflokeVoicelines = new Dictionary<string, SoundObject>();
         public static Dictionary<string, SoundObject> MorshuVoicelines = new Dictionary<string, SoundObject>();
+        public static Dictionary<string, ItemObject> items = new Dictionary<string, ItemObject>();
         public static SoundObject gunShoot;
         public static WeightedSoundObject[] jumpscareSounds;
         public static List<Sprite> RaldiDance = new List<Sprite>(); //oh god.
@@ -34,7 +36,11 @@ namespace RaldiCrackhousePlus
         public static LoopingSoundObject CrackEscapeMusic;
         public static string CrackElevatorMusic;
         private static string posterPath;
+        private static string itemPath;
         public static List<WeightedPosterObject> posters = new List<WeightedPosterObject>();
+
+        public static Sprite chipflokeSprite;
+
         void AddPoster(int weight, params string[] posterNames)
         {
             List<Texture2D> texs = new List<Texture2D>();
@@ -47,6 +53,23 @@ namespace RaldiCrackhousePlus
                 weight=weight,
                 selection=ObjectCreatorHandlers.CreatePosterObject(texs.ToArray())
             });
+        }
+
+        ItemObject CreateItem<T>(string nameInternal, string nameDisplay, string description, string sprite, int price, int genCost) where T : Item
+        {
+            ItemObject obj = ObjectCreatorHandlers.CreateItemObject(nameDisplay, 
+                description, 
+                AssetManager.SpriteFromTexture2D(AssetManager.TextureFromFile(Path.Combine(itemPath, sprite + "Small.png")), Vector2.one / 2f, 25f),
+                AssetManager.SpriteFromTexture2D(AssetManager.TextureFromFile(Path.Combine(itemPath, sprite + "Big.png")), Vector2.one / 2f, 50f), 
+                EnumExtensions.ExtendEnum<Items>(nameInternal),
+                price,
+                genCost
+                );
+            obj.item = new GameObject().AddComponent<T>();
+            obj.item.name = nameInternal + "Object";
+            DontDestroyOnLoad(obj.item);
+            items.Add(nameInternal,obj);
+            return obj;
         }
 
         void Awake()
@@ -112,6 +135,27 @@ namespace RaldiCrackhousePlus
             MorshuVoicelines.Add("intro", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "morshustore.wav"), "Vfx_Morshu_Intro", SoundType.Voice, new Color(220f/255f,67/255f,16/255f)));
             MorshuVoicelines.Add("reject", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "morshureject.wav"), "Vfx_Morshu_MmmmRicher", SoundType.Voice, new Color(220f / 255f, 67 / 255f, 16 / 255f)));
             MorshuVoicelines.Add("mmm", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "morshummm.wav"), "Vfx_Morshu_Mmmm", SoundType.Voice, new Color(220f / 255f, 67 / 255f, 16 / 255f)));
+
+            ChipflokeVoicelines.Add("10", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_10.wav"), "Vfx_PRI_10", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            ChipflokeVoicelines.Add("15", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_15.wav"), "Vfx_PRI_15", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            ChipflokeVoicelines.Add("30", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_30.wav"), "Vfx_PRI_30", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            ChipflokeVoicelines.Add("45", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_45.wav"), "Vfx_PRI_45", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            ChipflokeVoicelines.Add("60", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_60.wav"), "Vfx_PRI_60", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            ChipflokeVoicelines.Add("99", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_99.wav"), "Vfx_PRI_99", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            ChipflokeVoicelines.Add("running", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_running.wav"), "Vfx_PRI_NoRunning", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            ChipflokeVoicelines.Add("drinking", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_drinking.wav"), "Vfx_PRI_NoDrinking", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            ChipflokeVoicelines.Add("bullying", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_bullying.wav"), "Vfx_PRI_NoBullying", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            ChipflokeVoicelines.Add("lockers", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_lockers.wav"), "Vfx_PRI_NoLockers", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            ChipflokeVoicelines.Add("escaping", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_escape.wav"), "Vfx_PRI_NoEscaping", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            ChipflokeVoicelines.Add("faculty", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_faculty.wav"), "Vfx_PRI_NoFaculty", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            ChipflokeVoicelines.Add("afterhours", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_afterhours.wav"), "Vfx_PRI_NoAfterHours", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            ChipflokeVoicelines.Add("whistle", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_whistle.wav"), "Vfx_PRI_Whistle", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            ChipflokeVoicelines.Add("jailtime", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_jailtime.wav"), "Vfx_PRI_Detention", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            ChipflokeVoicelines.Add("coming", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_coming.wav"), "Vfx_PRI_Coming", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            ChipflokeVoicelines.Add("scold1", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_knowbetter.wav"), "Vfx_PRI_Scold1", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            ChipflokeVoicelines.Add("scold2", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_scold02.wav"), "Vfx_PRI_Scold2", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            ChipflokeVoicelines.Add("scold3", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_scold03.wav"), "Vfx_PRI_Scold3", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            ChipflokeVoicelines.Add("scold4", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_scold03.wav"), "Vfx_PRI_Scold4", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
             /*for (int i = 0; i < 5; i++)
             {
                 RaldiSlap.Add(AssetManager.SpriteFromTexture2D(AssetManager.TextureFromMod(this, "Sprites", String.Format("Raldi_Slap_{0}.png", i.ToString("0"))), Vector2.one / 2f, 32f));
@@ -146,6 +190,11 @@ namespace RaldiCrackhousePlus
             AddPoster(10, "Poster_Beast06");
             AddPoster(10, "Poster_Beast07");
             AddPoster(60, "Poster_AddMe");
+            itemPath = Path.Combine(AssetManager.GetModPath(this), "Sprites", "Items");
+            CreateItem<ITM_15SecondEnergy>("15Energy","Itm_15Energy", "Desc_15Energy", "Energy", 65, 45);
+            CreateItem<ITM_JailFreeCard>("JailFree", "Itm_JailFree", "Desc_JailFree", "Card", 80, 55);
+
+            chipflokeSprite = AssetManager.SpriteFromTexture2D(AssetManager.TextureFromMod(this, "Sprites", "Chipfloke.png"), Vector2.one / 2f, 65f);
 
             GeneratorManagement.Register(this, GenerationModType.Addend, (string floorName, int floorId, LevelObject obj) =>
             {
@@ -162,11 +211,40 @@ namespace RaldiCrackhousePlus
                         changedBaldis++;
                     }
                 });
+
+                obj.items = obj.items.AddRangeToArray(new WeightedItemObject[]
+                {
+                    new WeightedItemObject()
+                    {
+                        weight = 90 - (floorId * 10),
+                        selection = items["15Energy"]
+                    },
+                    new WeightedItemObject()
+                    {
+                        weight = 30 + (floorId * 10),
+                        selection = items["JailFree"]
+                    }
+                });
+
+                obj.shopItems = obj.shopItems.AddRangeToArray(new WeightedItemObject[]
+                {
+                    new WeightedItemObject()
+                    {
+                        weight = 80 + (floorId * 10),
+                        selection = items["15Energy"]
+                    },
+                    new WeightedItemObject()
+                    {
+                        weight = 40 + (floorId * 15),
+                        selection = items["JailFree"]
+                    }
+                });
+
                 obj.posters = obj.posters.AddRangeToArray(RaldiPlugin.posters.ToArray());
                 Log.LogDebug("Succesfully cleaned up and destroyed " + changedBaldis + " Baldis!");
                 obj.MarkAsNeverUnload();
             });
-
+            MTM101BaldiDevAPI.SavesEnabled = false;
         }
 
         internal static void TransformIntoRaldi(Baldi b)
