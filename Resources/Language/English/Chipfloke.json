@@ -1,0 +1,33 @@
+{"items":[
+
+{"key":"Vfx_PRI_Detention","value":"jailtime for you!"},
+{"key":"Vfx_PRI_Scold1","value":"You should know better."},
+{"key":"Vfx_PRI_15","value":"10 seconds"},
+{"key":"Vfx_PRI_15","value":"15 seconds"},
+{"key":"Vfx_PRI_20","value":"20 seconds"},
+{"key":"Vfx_PRI_25","value":"25 seconds"},
+{"key":"Vfx_PRI_30","value":"30 seconds"},
+{"key":"Vfx_PRI_35","value":"35 seconds"},
+{"key":"Vfx_PRI_40","value":"40 seconds"},
+{"key":"Vfx_PRI_45","value":"45 seconds"},
+{"key":"Vfx_PRI_50","value":"50 seconds"},
+{"key":"Vfx_PRI_55","value":"55 seconds"},
+{"key":"Vfx_PRI_60","value":"60 seconds"},
+{"key":"Vfx_PRI_99","value":"99 seconds"},
+{"key":"Vfx_PRI_Coming","value":"Don't worry, I'm coming!"},
+{"key":"Vfx_PRI_NoAfterHours","value":"No entering the crackhouse after-hours in the halls!"},
+{"key":"Vfx_PRI_NoBullying","value":"No bullying in the halls!"},
+{"key":"Vfx_PRI_NoDrinking","value":"No drinking drinks in the halls!"},
+{"key":"Vfx_PRI_NoEating","value":"No eating food in the halls!"},
+{"key":"Vfx_PRI_NoEscaping","value":"<b>Don't you fucking dare escape my fucking jail cell.</b>!"},
+{"key":"Vfx_PRI_NoFaculty","value":"No entering faculty only rooms in the halls!"},
+{"key":"Vfx_PRI_NoLockers","value":"No looking in other people's lockers in the halls!"},
+{"key":"Vfx_PRI_NoRunning","value":"No running in the halls!"},
+{"key":"Vfx_PRI_Scold2","value":"When will you fucking learn?"},
+{"key":"Vfx_PRI_Whistle","value":"*Whistling*"},
+{"key":"Vfx_PRI_Scold3","value":"Your parents will know about your wrongdoings!"},
+{"key":"Vfx_PRI_Scold4","value":"My subscribes will know about your tomfoolery!"},
+{"key":"PST_PRI_Principal1","value":"Chipfloke"},
+{"key":"PST_PRI_Principal2","value":"Call from mom. Day ruined."}
+
+]}

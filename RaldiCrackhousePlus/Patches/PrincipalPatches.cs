@@ -91,6 +91,7 @@ namespace RaldiCrackhousePlus.Patches
             {
                 return true;
             }
+            ___audMan.FlushQueue(true);
             ___audMan.QueueAudio(RaldiPlugin.ChipflokeVoicelines[brokenRule.ToLower()]);
             return false;
         }

@@ -40,6 +40,8 @@ namespace RaldiCrackhousePlus
         public static List<WeightedPosterObject> posters = new List<WeightedPosterObject>();
 
         public static Sprite chipflokeSprite;
+        public static Texture2D cobblestoneWall;
+        public static WindowObject JailWindowObject;
 
         void AddPoster(int weight, params string[] posterNames)
         {
@@ -196,6 +198,8 @@ namespace RaldiCrackhousePlus
 
             chipflokeSprite = AssetManager.SpriteFromTexture2D(AssetManager.TextureFromMod(this, "Sprites", "Chipfloke.png"), Vector2.one / 2f, 65f);
 
+            cobblestoneWall = AssetManager.TextureFromMod(this, "Textures", "Cobblestone.png");
+
             GeneratorManagement.Register(this, GenerationModType.Addend, (string floorName, int floorId, LevelObject obj) =>
             {
                 obj.maxClassRooms += 1;
@@ -316,6 +320,15 @@ namespace RaldiCrackhousePlus
                 //x.gum.ReflectionSetVariable("speed", ((float)x.gum.ReflectionGetVariable("speed")) * 2f);
             });
             AssetManager.ReplaceAllTexturesFromFolder(Path.Combine(AssetManager.GetModPath(RaldiPlugin.Instance), "TextureReplacements"));
+
+            /*WindowObject winTemplate = Resources.FindObjectsOfTypeAll<WindowObject>().Where(x => x.name == "WoodWindow").First();
+
+            RaldiPlugin.JailWindowObject = ScriptableObject.CreateInstance<WindowObject>();
+            RaldiPlugin.JailWindowObject.name = "Jail Window";
+            Material maskMat = new Material(winTemplate.mask);
+            maskMat.m
+            RaldiPlugin.JailWindowObject.mask = winTemplate.mask;*/
+
             //Graphics.CopyTexture(AssetManager.TextureFromMod(RaldiPlugin.Instance, "test.png"), Resources.FindObjectsOfTypeAll<Texture2D>().Where(x => x.name == "Tubes (3)").First());
         }
     }

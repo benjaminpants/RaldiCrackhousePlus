@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
@@ -32,6 +33,7 @@ namespace RaldiCrackhousePlus.Patches
             canvas.Find("JohnnyMouth").gameObject.SetActive(false);
             Image morshu = canvas.Find("JohnnyBase").GetComponent<Image>();
             morshu.rectTransform.sizeDelta = new Vector2(230f,150f);
+            morshu.sprite = RaldiPlugin.MorshuSprites.First();
             bool ignoreList = ___audMan.ignoreListenerPause;
             AudioSource src = ___audMan.audioDevice;
             GameObject audGam = ___audMan.gameObject;
