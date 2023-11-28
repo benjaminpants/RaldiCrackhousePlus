@@ -62,6 +62,9 @@
     <Reference Include="NavMeshComponents">
       <HintPath>..\Dependencies\NavMeshComponents.dll</HintPath>
     </Reference>
+    <Reference Include="QuarterPouch">
+      <HintPath>..\Dependencies\QuarterPouch.dll</HintPath>
+    </Reference>
     <Reference Include="Rewired_Core">
       <HintPath>..\Dependencies\Rewired_Core.dll</HintPath>
     </Reference>

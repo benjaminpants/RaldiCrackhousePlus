@@ -12,9 +12,12 @@ using System.Linq;
 using UnityEngine.Audio;
 using System.Reflection;
 using System.IO;
+using QuarterPouch;
+using System.Collections;
 
 namespace RaldiCrackhousePlus
 {
+    [BepInDependency("mtm101.rulerp.baldiplus.quarterpouch")]
     [BepInDependency("mtm101.rulerp.bbplus.baldidevapi")]
     [BepInPlugin("mtm101.rulerp.baldiplus.crackhouseplus", "Raldi's Crackhouse Plus", "0.0.0.0")]
     public class RaldiPlugin : BaseUnityPlugin
@@ -42,6 +45,11 @@ namespace RaldiCrackhousePlus
         public static Sprite chipflokeSprite;
         public static Texture2D cobblestoneWall;
         public static WindowObject JailWindowObject;
+        public static StandardDoorMats JailDoorObject;
+        public static Material JailDoorMask;
+
+        public static List<SodaMachine> SodaMachines = new List<SodaMachine>();
+        public static Dictionary<string, Material[]> SodaMachineMaterials = new Dictionary<string, Material[]>();
 
         void AddPoster(int weight, params string[] posterNames)
         {
@@ -55,6 +63,17 @@ namespace RaldiCrackhousePlus
                 weight=weight,
                 selection=ObjectCreatorHandlers.CreatePosterObject(texs.ToArray())
             });
+        }
+
+        internal void CreateMachineMats(Material[] mats, string itemName, string texName)
+        {
+            Material fullMat = new Material(mats.Where(x => x.name == "BSODAMachine").First());
+            Material outMat = new Material(mats.Where(x => x.name == "BSODAMachine_Out").First());
+            fullMat.SetTexture("_MainTex", AssetManager.TextureFromMod(this, "Textures", texName + ".png"));
+            fullMat.name = String.Format(itemName + "ItemMachineFull");
+            outMat.SetTexture("_MainTex", AssetManager.TextureFromMod(this, "Textures", texName + "Out.png"));
+            outMat.name = String.Format(itemName + "ItemMachineOut");
+            SodaMachineMaterials.Add(itemName, new Material[] { fullMat, outMat });
         }
 
         ItemObject CreateItem<T>(string nameInternal, string nameDisplay, string description, string sprite, int price, int genCost) where T : Item
@@ -74,8 +93,22 @@ namespace RaldiCrackhousePlus
             return obj;
         }
 
+        IEnumerator HackyInitPouchSearch(PouchManager pm)
+        {
+            yield return null;
+            yield return null;
+            QuarterPouch.QuarterPouch p = (QuarterPouch.QuarterPouch)pm.Pouches.Where(x => x.GetType() == typeof(QuarterPouch.QuarterPouch)).First();
+            p.AddConversionRateIfAvailable("HalfDollar", 0.5);
+            p.actingItems = p.actingItems.AddItem(items["HalfDollar"].itemType).ToArray();
+            yield break;
+        }
+
         void Awake()
         {
+            //add our conversion rate so the energy thing can work
+            QuarterPouchPlugin.InitializePouches += (PouchManager pm) => {
+                StartCoroutine(HackyInitPouchSearch(pm));
+            };
             Instance = this;
             Harmony harmony = new Harmony("mtm101.rulerp.baldiplus.crackhouseplus");
             Log = this.Logger;
@@ -140,6 +173,7 @@ namespace RaldiCrackhousePlus
 
             ChipflokeVoicelines.Add("10", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_10.wav"), "Vfx_PRI_10", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
             ChipflokeVoicelines.Add("15", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_15.wav"), "Vfx_PRI_15", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            ChipflokeVoicelines.Add("20", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_20.wav"), "Vfx_PRI_30", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
             ChipflokeVoicelines.Add("30", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_30.wav"), "Vfx_PRI_30", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
             ChipflokeVoicelines.Add("45", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_45.wav"), "Vfx_PRI_45", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
             ChipflokeVoicelines.Add("60", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_60.wav"), "Vfx_PRI_60", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
@@ -195,9 +229,9 @@ namespace RaldiCrackhousePlus
             itemPath = Path.Combine(AssetManager.GetModPath(this), "Sprites", "Items");
             CreateItem<ITM_15SecondEnergy>("15Energy","Itm_15Energy", "Desc_15Energy", "Energy", 65, 45);
             CreateItem<ITM_JailFreeCard>("JailFree", "Itm_JailFree", "Desc_JailFree", "Card", 80, 55);
+            CreateItem<ITM_Acceptable>("HalfDollar", "Half Dollar(YOU ARENT SUPPOSED TO HAVE THIS)", "stop hacking.", "HalfDollar", 6900, 6900); //FOR INTERNAL USE WITH QUARTERPOUCH ONLY!
 
             chipflokeSprite = AssetManager.SpriteFromTexture2D(AssetManager.TextureFromMod(this, "Sprites", "Chipfloke.png"), Vector2.one / 2f, 65f);
-
             cobblestoneWall = AssetManager.TextureFromMod(this, "Textures", "Cobblestone.png");
 
             GeneratorManagement.Register(this, GenerationModType.Addend, (string floorName, int floorId, LevelObject obj) =>
@@ -298,6 +332,7 @@ namespace RaldiCrackhousePlus
     {
         static void Prefix()
         {
+            RaldiPlugin.items["HalfDollar"].item.ReflectionSetVariable("audUse", Resources.FindObjectsOfTypeAll<SoundObject>().Where(x => x.name == "CoinDrop").First());
             Baldi[] Baldis = Resources.FindObjectsOfTypeAll<Baldi>().Where(x => x.GetType() == typeof(Baldi)).ToArray();
             for (int i = 0; i < Baldis.Length; i++)
             {
@@ -321,14 +356,39 @@ namespace RaldiCrackhousePlus
             });
             AssetManager.ReplaceAllTexturesFromFolder(Path.Combine(AssetManager.GetModPath(RaldiPlugin.Instance), "TextureReplacements"));
 
-            /*WindowObject winTemplate = Resources.FindObjectsOfTypeAll<WindowObject>().Where(x => x.name == "WoodWindow").First();
+            Material[] mats = Resources.FindObjectsOfTypeAll<Material>();
+
+            WindowObject winTemplate = Resources.FindObjectsOfTypeAll<WindowObject>().Where(x => x.name == "WoodWindow").First();
 
             RaldiPlugin.JailWindowObject = ScriptableObject.CreateInstance<WindowObject>();
             RaldiPlugin.JailWindowObject.name = "Jail Window";
             Material maskMat = new Material(winTemplate.mask);
-            maskMat.m
-            RaldiPlugin.JailWindowObject.mask = winTemplate.mask;*/
+            maskMat.SetTexture("_Mask",AssetManager.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailWindowMask.png"));
+            RaldiPlugin.JailWindowObject.mask = maskMat;
+            Material windowMat = new Material(winTemplate.overlay.First());
+            windowMat.SetTexture("_MainTex", AssetManager.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailWindow.png"));
+            RaldiPlugin.JailWindowObject.overlay = new Material[] { windowMat, windowMat };
+            Material openMat = new Material(winTemplate.open.First());
+            openMat.SetTexture("_MainTex", AssetManager.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailWindowBreak.png"));
+            RaldiPlugin.JailWindowObject.open = new Material[] { openMat, openMat };
+            RaldiPlugin.JailWindowObject.windowPre = winTemplate.windowPre;
 
+            StandardDoorMats templateDoorMat = Resources.FindObjectsOfTypeAll<StandardDoorMats>().Where(x => x.name == "ClassDoorSet").First();
+            RaldiPlugin.JailDoorObject = ScriptableObject.CreateInstance<StandardDoorMats>();
+            RaldiPlugin.JailDoorObject.name = "JailDoor";
+            Material doorOpenMat = new Material(templateDoorMat.open);
+            doorOpenMat.SetTexture("_MainTex", AssetManager.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailDoorOpened.png"));
+            RaldiPlugin.JailDoorObject.open = doorOpenMat;
+            Material doorClosedMat = new Material(templateDoorMat.shut);
+            doorClosedMat.SetTexture("_MainTex", AssetManager.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailDoorClosed.png"));
+            RaldiPlugin.JailDoorObject.shut = doorClosedMat;
+            Texture2D doorMask = AssetManager.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailDoorMask.png");
+            Material doorMaskMat = new Material(mats.Where(x => x.name == "DoorMask").First());
+            doorMaskMat.SetTexture("_MainTex", doorMask);
+            doorMaskMat.SetTexture("_Mask", doorMask);
+            RaldiPlugin.JailDoorMask = doorMaskMat;
+
+            RaldiPlugin.Instance.CreateMachineMats(mats, "15Energy", "Machine_Energy");
             //Graphics.CopyTexture(AssetManager.TextureFromMod(RaldiPlugin.Instance, "test.png"), Resources.FindObjectsOfTypeAll<Texture2D>().Where(x => x.name == "Tubes (3)").First());
         }
     }
