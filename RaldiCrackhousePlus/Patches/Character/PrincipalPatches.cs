@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace RaldiCrackhousePlus.Patches
+namespace RaldiCrackhousePlus.Patches.Character
 {
     [HarmonyPatch(typeof(Principal))]
     [HarmonyPatch("SendToDetention")]

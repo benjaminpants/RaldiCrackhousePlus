@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 
-namespace RaldiCrackhousePlus.Patches
+namespace RaldiCrackhousePlus.Patches.Character
 {
     [HarmonyPatch(typeof(Beans))]
     [HarmonyPatch("Start")]

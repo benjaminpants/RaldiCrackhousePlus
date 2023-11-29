@@ -6,7 +6,7 @@ using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace RaldiCrackhousePlus.Patches
+namespace RaldiCrackhousePlus.Patches.Character
 {
     [HarmonyPatch(typeof(Bully))]
     [HarmonyPatch("Start")]
@@ -56,7 +56,7 @@ namespace RaldiCrackhousePlus.Patches
             foreach (CodeInstruction instruction in instructions)
             {
                 yield return instruction;
-                if ((instruction.opcode == OpCodes.Blt_S) && (!didFirstFor)) //end of the for loop
+                if (instruction.opcode == OpCodes.Blt_S && !didFirstFor) //end of the for loop
                 {
                     didFirstFor = true;
                     yield return new CodeInstruction(OpCodes.Ldarg_0); //this
