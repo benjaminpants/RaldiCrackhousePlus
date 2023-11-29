@@ -110,7 +110,6 @@ namespace RaldiCrackhousePlus
             }
             if (preparingForDrip) return;
             if (Singleton<CoreGameManager>.Instance.currentMode == Mode.Free) return;
-
             if (Singleton<BaseGameManager>.Instance.FoundNotebooks >= Singleton<BaseGameManager>.Instance.NotebookTotal)
             {
                 StartCoroutine(DripModePause());
