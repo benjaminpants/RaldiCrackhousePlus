@@ -17,6 +17,7 @@ using System.Collections;
 
 namespace RaldiCrackhousePlus
 {
+    [BepInDependency("net.Fasguy.BepInHelper")]
     [BepInDependency("mtm101.rulerp.baldiplus.quarterpouch")]
     [BepInDependency("mtm101.rulerp.bbplus.baldidevapi")]
     [BepInPlugin("mtm101.rulerp.baldiplus.crackhouseplus", "Raldi's Crackhouse Plus", "0.0.0.0")]
@@ -27,6 +28,7 @@ namespace RaldiCrackhousePlus
         public static Dictionary<string, SoundObject> RaldiVoicelines = new Dictionary<string, SoundObject>();
         public static Dictionary<string, SoundObject> ChipflokeVoicelines = new Dictionary<string, SoundObject>();
         public static Dictionary<string, SoundObject> MorshuVoicelines = new Dictionary<string, SoundObject>();
+        public static Dictionary<string, SoundObject> BritishVoicelines = new Dictionary<string, SoundObject>();
         public static Dictionary<string, ItemObject> items = new Dictionary<string, ItemObject>();
         public static SoundObject gunShoot;
         public static WeightedSoundObject[] jumpscareSounds;
@@ -170,6 +172,10 @@ namespace RaldiCrackhousePlus
             MorshuVoicelines.Add("intro", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "morshustore.wav"), "Vfx_Morshu_Intro", SoundType.Voice, new Color(220f/255f,67/255f,16/255f)));
             MorshuVoicelines.Add("reject", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "morshureject.wav"), "Vfx_Morshu_MmmmRicher", SoundType.Voice, new Color(220f / 255f, 67 / 255f, 16 / 255f)));
             MorshuVoicelines.Add("mmm", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "morshummm.wav"), "Vfx_Morshu_Mmmm", SoundType.Voice, new Color(220f / 255f, 67 / 255f, 16 / 255f)));
+            BritishVoicelines.Add("giveme", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "BritishBloke", "blo_sweet.wav"), "Vfx_Bully_TakeCandy", SoundType.Voice, new Color(89f / 255f, 81f / 255f, 107f / 255f)));
+            BritishVoicelines.Add("nopass", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "BritishBloke", "blo_chance.wav"), "Vfx_Bully_NoItems", SoundType.Voice, new Color(89f / 255f, 81f / 255f, 107f / 255f)));
+            BritishVoicelines.Add("thanks", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "BritishBloke", "blo_thanks.wav"), "Vfx_Bully_Donation", SoundType.Voice, new Color(89f / 255f, 81f / 255f, 107f / 255f)));
+            BritishVoicelines.Add("bored", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "BritishBloke", "blo_hmm.wav"), "Vfx_Bully_Bored", SoundType.Voice, new Color(89f / 255f, 81f / 255f, 107f / 255f)));
 
             ChipflokeVoicelines.Add("10", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_10.wav"), "Vfx_PRI_10", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
             ChipflokeVoicelines.Add("15", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_15.wav"), "Vfx_PRI_15", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));

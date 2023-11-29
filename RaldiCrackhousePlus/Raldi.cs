@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using AlmostEngine;
+using HarmonyLib;
 using MTM101BaldAPI;
 using System;
 using System.Collections;
@@ -108,6 +109,8 @@ namespace RaldiCrackhousePlus
                 return;
             }
             if (preparingForDrip) return;
+            if (Singleton<CoreGameManager>.Instance.currentMode == Mode.Free) return;
+
             if (Singleton<BaseGameManager>.Instance.FoundNotebooks >= Singleton<BaseGameManager>.Instance.NotebookTotal)
             {
                 StartCoroutine(DripModePause());
