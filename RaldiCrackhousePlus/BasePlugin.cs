@@ -363,6 +363,14 @@ namespace RaldiCrackhousePlus
                 // dear mystman12: what the fuck. why isnt this localized. why is this like this at all.
                 RaldiPlugin.detentionUI.transform.Find("MainText").gameObject.GetComponent<TMP_Text>().text = "Jail time!\n\r  seconds remain.";
                 //Graphics.CopyTexture(AssetLoader.TextureFromMod(RaldiPlugin.Instance, "test.png"), Resources.FindObjectsOfTypeAll<Texture2D>().Where(x => x.name == "Tubes (3)").First());
+
+                NPCMetaStorage.Instance.Get(Character.Prize).prefabs.Values.Do(x =>
+                {
+                    x.ReflectionSetVariable("turnSpeed", ((float)x.ReflectionGetVariable("turnSpeed")) * 3f);
+                    x.Navigator.accel *= 7.5f;
+                });
+
+                Resources.FindObjectsOfTypeAll<SoundObject>().Where(x => x.name == "Mus_Party").First().soundClip = AssetLoader.AudioClipFromMod(this, "Music", "mus_dancin.mp3");
             }, false);
         }
 
