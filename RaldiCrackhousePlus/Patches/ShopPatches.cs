@@ -16,17 +16,17 @@ namespace RaldiCrackhousePlus.Patches
         {
             ___audBuy = new SoundObject[]
             {
-                RaldiPlugin.MorshuVoicelines["mmm"]
+                RaldiPlugin.assetMan.Get<SoundObject>("morshu_mmm")
             };
             ___audMapFilled = ___audBuy;
             ___audLeaveHappy = null;
             ___audLeaveSad = null;
 
-            ___audJonIntro = RaldiPlugin.MorshuVoicelines["intro"];
+            ___audJonIntro = RaldiPlugin.assetMan.Get<SoundObject>("morshu_intro");
             ___audIntroP2 = null;
             ___audUnafforable = new SoundObject[]
             {
-                RaldiPlugin.MorshuVoicelines["reject"]
+                RaldiPlugin.assetMan.Get<SoundObject>("morshu_reject")
             };
 
             Transform canvas = __instance.transform.Find("Canvas");

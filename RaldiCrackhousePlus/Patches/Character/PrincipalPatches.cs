@@ -42,20 +42,20 @@ namespace RaldiCrackhousePlus.Patches.Character
                     break;
             }
             string keyToTry = ((int)___detentionInit).ToString();
-            if (RaldiPlugin.ChipflokeVoicelines.ContainsKey(keyToTry))
+            if (RaldiPlugin.assetMan.ContainsKey("chipfloke_" + keyToTry))
             {
                 ___audTimes = new SoundObject[]
                 {
-                    RaldiPlugin.ChipflokeVoicelines[keyToTry],
-                    RaldiPlugin.ChipflokeVoicelines[keyToTry]
+                    RaldiPlugin.assetMan.Get<SoundObject>("chipfloke_" + keyToTry),
+                    RaldiPlugin.assetMan.Get<SoundObject>("chipfloke_" + keyToTry),
                 };
             }
             else
             {
                 ___audTimes = new SoundObject[]
                 {
-                    RaldiPlugin.MorshuVoicelines["mmm"],
-                    RaldiPlugin.MorshuVoicelines["mmm"]
+                    RaldiPlugin.assetMan.Get<SoundObject>("morshu_mmm"),
+                    RaldiPlugin.assetMan.Get<SoundObject>("morshu_mmm"),
                 };
             }
         }
@@ -67,15 +67,15 @@ namespace RaldiCrackhousePlus.Patches.Character
     {
         static void Postfix(Principal __instance, ref SoundObject ___audComing, ref SoundObject ___audWhistle, ref SoundObject ___audDetention, ref SoundObject[] ___audScolds)
         {
-            ___audComing = RaldiPlugin.ChipflokeVoicelines["coming"];
-            ___audWhistle = RaldiPlugin.ChipflokeVoicelines["whistle"];
-            ___audDetention = RaldiPlugin.ChipflokeVoicelines["jailtime"];
+            ___audComing = RaldiPlugin.assetMan.Get<SoundObject>("chipfloke_coming");
+            ___audWhistle = RaldiPlugin.assetMan.Get<SoundObject>("chipfloke_whistle");
+            ___audDetention = RaldiPlugin.assetMan.Get<SoundObject>("chipfloke_jailtime");
             ___audScolds = new SoundObject[]
             {
-                RaldiPlugin.ChipflokeVoicelines["scold1"],
-                RaldiPlugin.ChipflokeVoicelines["scold2"],
-                RaldiPlugin.ChipflokeVoicelines["scold3"],
-                RaldiPlugin.ChipflokeVoicelines["scold4"],
+                RaldiPlugin.assetMan.Get<SoundObject>("chipfloke_scold1"),
+                RaldiPlugin.assetMan.Get<SoundObject>("chipfloke_scold2"),
+                RaldiPlugin.assetMan.Get<SoundObject>("chipfloke_scold3"),
+                RaldiPlugin.assetMan.Get<SoundObject>("chipfloke_scold4"),
             };
             __instance.spriteRenderer[0].sprite = RaldiPlugin.chipflokeSprite;
         }
@@ -87,12 +87,12 @@ namespace RaldiCrackhousePlus.Patches.Character
     {
         static bool Prefix(Principal __instance, AudioManager ___audMan, string brokenRule)
         {
-            if (!RaldiPlugin.ChipflokeVoicelines.ContainsKey(brokenRule.ToLower()))
+            if (!RaldiPlugin.assetMan.ContainsKey("chipfloke_" + brokenRule.ToLower()))
             {
                 return true;
             }
             ___audMan.FlushQueue(true);
-            ___audMan.QueueAudio(RaldiPlugin.ChipflokeVoicelines[brokenRule.ToLower()]);
+            ___audMan.QueueAudio(RaldiPlugin.assetMan.Get<SoundObject>("chipfloke_" + brokenRule.ToLower()));
             return false;
         }
     }

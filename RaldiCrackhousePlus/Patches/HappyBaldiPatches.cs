@@ -14,7 +14,7 @@ namespace RaldiCrackhousePlus.Patches
     {
         static void Prefix(ref SoundObject ___audIntro)
         {
-            ___audIntro = RaldiPlugin.RaldiVoicelines["greeting"];
+            ___audIntro = RaldiPlugin.assetMan.Get<SoundObject>("raldi_greeting");
         }
     }
 
@@ -38,7 +38,7 @@ namespace RaldiCrackhousePlus.Patches
             audMan.FlushQueue(true);
             Singleton<MusicManager>.Instance.StopFile();
             Singleton<MusicManager>.Instance.StopMidi();
-            audMan.PlaySingle(RaldiPlugin.RaldiVoicelines["dance"]);
+            audMan.PlaySingle(RaldiPlugin.assetMan.Get<SoundObject>("raldi_dance"));
             __instance.GetComponent<Animator>().enabled = false;
             __instance.StartCoroutine(StupidDance(spri));
             while (audMan.IsPlaying || Singleton<CoreGameManager>.Instance.Paused)

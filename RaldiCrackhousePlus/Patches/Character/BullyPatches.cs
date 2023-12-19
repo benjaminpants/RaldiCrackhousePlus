@@ -14,15 +14,15 @@ namespace RaldiCrackhousePlus.Patches.Character
     {
         static void Prefix(ref SoundObject ___bored, ref SoundObject ___noItems, ref SoundObject[] ___callouts, ref SoundObject[] ___takeouts)
         {
-            ___bored = RaldiPlugin.BritishVoicelines["bored"];
-            ___noItems = RaldiPlugin.BritishVoicelines["nopass"];
+            ___bored = RaldiPlugin.assetMan.Get<SoundObject>("british_bored");
+            ___noItems = RaldiPlugin.assetMan.Get<SoundObject>("british_nopass");
             ___callouts = new SoundObject[]
             {
-                RaldiPlugin.BritishVoicelines["giveme"]
+                RaldiPlugin.assetMan.Get<SoundObject>("british_giveme")
             };
             ___takeouts = new SoundObject[]
             {
-                RaldiPlugin.BritishVoicelines["thanks"]
+                RaldiPlugin.assetMan.Get<SoundObject>("british_thanks")
             };
         }
     }

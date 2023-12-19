@@ -63,24 +63,24 @@ namespace RaldiCrackhousePlus.Patches.Character
             __instance.gameObject.AddComponent<VanManManager>();
             ___audCount = new SoundObject[]
             {
-                RaldiPlugin.VanManVoicelines["1"],
-                RaldiPlugin.VanManVoicelines["2"],
-                RaldiPlugin.VanManVoicelines["3"],
-                RaldiPlugin.VanManVoicelines["4"],
-                RaldiPlugin.VanManVoicelines["5"],
-                RaldiPlugin.VanManVoicelines["6"],
-                RaldiPlugin.VanManVoicelines["7"],
-                RaldiPlugin.VanManVoicelines["8"],
-                RaldiPlugin.VanManVoicelines["9"],
+                RaldiPlugin.assetMan.Get<SoundObject>("vanman_1"),
+                RaldiPlugin.assetMan.Get<SoundObject>("vanman_2"),
+                RaldiPlugin.assetMan.Get<SoundObject>("vanman_3"),
+                RaldiPlugin.assetMan.Get<SoundObject>("vanman_4"),
+                RaldiPlugin.assetMan.Get<SoundObject>("vanman_5"),
+                RaldiPlugin.assetMan.Get<SoundObject>("vanman_6"),
+                RaldiPlugin.assetMan.Get<SoundObject>("vanman_7"),
+                RaldiPlugin.assetMan.Get<SoundObject>("vanman_8"),
+                RaldiPlugin.assetMan.Get<SoundObject>("vanman_9"),
             };
             ___audCalls = new SoundObject[]
             {
-                RaldiPlugin.VanManVoicelines["laugh"]
+                RaldiPlugin.assetMan.Get<SoundObject>("vanman_laugh")
             };
-            ___audLetsPlay = RaldiPlugin.VanManVoicelines["letsplay"];
-            ___audGo = RaldiPlugin.VanManVoicelines["readygo"];
-            ___audCongrats = RaldiPlugin.VanManVoicelines["congrats"];
-            ___audSad = RaldiPlugin.VanManVoicelines["thefuck"];
+            ___audLetsPlay = RaldiPlugin.assetMan.Get<SoundObject>("vanman_letsplay");
+            ___audGo = RaldiPlugin.assetMan.Get<SoundObject>("vanman_readygo");
+            ___audCongrats = RaldiPlugin.assetMan.Get<SoundObject>("vanman_congrats");
+            ___audSad = RaldiPlugin.assetMan.Get<SoundObject>("vanman_thefuck");
         }
     }
 
@@ -94,14 +94,14 @@ namespace RaldiCrackhousePlus.Patches.Character
             if (vmm.nextFailIsKidnapping)
             {
                 vmm.nextFailIsKidnapping = false;
-                ___audSad = RaldiPlugin.VanManVoicelines["kidnap"];
+                ___audSad = RaldiPlugin.assetMan.Get<SoundObject>("vanman_kidnap");
                 Singleton<CoreGameManager>.Instance.AddPoints(-30, 0, true);
             }
         }
 
         static void Postfix(ref SoundObject ___audSad)
         {
-            ___audSad = RaldiPlugin.VanManVoicelines["thefuck"];
+            ___audSad = RaldiPlugin.assetMan.Get<SoundObject>("vanman_thefuck");
         }
 
     }

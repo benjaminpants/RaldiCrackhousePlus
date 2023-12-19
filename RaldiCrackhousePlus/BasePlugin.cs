@@ -3,7 +3,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using MTM101BaldAPI;
 using UnityEngine;
-using MTM101BaldAPI.AssetManager;
+using MTM101BaldAPI.AssetTools;
 using System.Collections.Generic;
 using System;
 using MTM101BaldAPI.Registers;
@@ -26,11 +26,9 @@ namespace RaldiCrackhousePlus
     {
         internal static ManualLogSource Log;
         public static RaldiPlugin Instance;
-        public static Dictionary<string, SoundObject> RaldiVoicelines = new Dictionary<string, SoundObject>();
-        public static Dictionary<string, SoundObject> ChipflokeVoicelines = new Dictionary<string, SoundObject>();
-        public static Dictionary<string, SoundObject> MorshuVoicelines = new Dictionary<string, SoundObject>();
-        public static Dictionary<string, SoundObject> BritishVoicelines = new Dictionary<string, SoundObject>();
-        public static Dictionary<string, SoundObject> VanManVoicelines = new Dictionary<string, SoundObject>();
+
+        public static AssetManager assetMan = new AssetManager();
+
         public static Dictionary<string, ItemObject> items = new Dictionary<string, ItemObject>();
         public static SoundObject gunShoot;
         public static WeightedSoundObject[] jumpscareSounds;
@@ -62,12 +60,12 @@ namespace RaldiCrackhousePlus
             List<Texture2D> texs = new List<Texture2D>();
             for (int i = 0; i < posterNames.Length; i++)
             {
-                texs.Add(AssetManager.TextureFromFile(Path.Combine(posterPath, posterNames[i] + ".png")));
+                texs.Add(AssetLoader.TextureFromFile(Path.Combine(posterPath, posterNames[i] + ".png")));
             }
             posters.Add(new WeightedPosterObject()
             {
                 weight=weight,
-                selection=ObjectCreatorHandlers.CreatePosterObject(texs.ToArray())
+                selection=ObjectCreators.CreatePosterObject(texs.ToArray())
             });
         }
 
@@ -75,19 +73,19 @@ namespace RaldiCrackhousePlus
         {
             Material fullMat = new Material(mats.Where(x => x.name == "BSODAMachine").First());
             Material outMat = new Material(mats.Where(x => x.name == "BSODAMachine_Out").First());
-            fullMat.SetTexture("_MainTex", AssetManager.TextureFromMod(this, "Textures", texName + ".png"));
+            fullMat.SetTexture("_MainTex", AssetLoader.TextureFromMod(this, "Textures", texName + ".png"));
             fullMat.name = String.Format(itemName + "ItemMachineFull");
-            outMat.SetTexture("_MainTex", AssetManager.TextureFromMod(this, "Textures", texName + "Out.png"));
+            outMat.SetTexture("_MainTex", AssetLoader.TextureFromMod(this, "Textures", texName + "Out.png"));
             outMat.name = String.Format(itemName + "ItemMachineOut");
             SodaMachineMaterials.Add(itemName, new Material[] { fullMat, outMat });
         }
 
         ItemObject CreateItem<T>(string nameInternal, string nameDisplay, string description, string sprite, int price, int genCost) where T : Item
         {
-            ItemObject obj = ObjectCreatorHandlers.CreateItemObject(nameDisplay, 
+            ItemObject obj = ObjectCreators.CreateItemObject(nameDisplay, 
                 description, 
-                AssetManager.SpriteFromTexture2D(AssetManager.TextureFromFile(Path.Combine(itemPath, sprite + "Small.png")), Vector2.one / 2f, 25f),
-                AssetManager.SpriteFromTexture2D(AssetManager.TextureFromFile(Path.Combine(itemPath, sprite + "Big.png")), Vector2.one / 2f, 50f), 
+                AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromFile(Path.Combine(itemPath, sprite + "Small.png")), Vector2.one / 2f, 25f),
+                AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromFile(Path.Combine(itemPath, sprite + "Big.png")), Vector2.one / 2f, 50f), 
                 EnumExtensions.ExtendEnum<Items>(nameInternal),
                 price,
                 genCost
@@ -118,34 +116,34 @@ namespace RaldiCrackhousePlus
             Instance = this;
             Harmony harmony = new Harmony("mtm101.rulerp.baldiplus.crackhouseplus");
             Log = this.Logger;
-            RaldiVoicelines.Add("greeting", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Raldi", "ral_hi.mp3"), "Vfx_Raldi_Greeting", SoundType.Voice, Color.green));
-            RaldiVoicelines.Add("dance", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Music", "mus_style.wav"), "Mus_GangnamStyle", SoundType.Music, Color.white));
-            RaldiVoicelines.Add("praise1", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Raldi", "ral_praise1.wav"), "Vfx_Raldi_Praise1", SoundType.Voice, Color.green));
-            RaldiVoicelines.Add("seeplayer", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Raldi", "ral_seeplayer.wav"), "Vfx_Raldi_PlayerSpotted", SoundType.Voice, Color.green));
+            assetMan.Add("raldi_greeting", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Raldi", "ral_hi.mp3"), "Vfx_Raldi_Greeting", SoundType.Voice, Color.green));
+            assetMan.Add("raldi_dance", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Music", "mus_style.wav"), "Mus_GangnamStyle", SoundType.Music, Color.white));
+            assetMan.Add("raldi_praise1", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Raldi", "ral_praise1.wav"), "Vfx_Raldi_Praise1", SoundType.Voice, Color.green));
+            assetMan.Add("raldi_seeplayer", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Raldi", "ral_seeplayer.wav"), "Vfx_Raldi_PlayerSpotted", SoundType.Voice, Color.green));
             jumpscareSounds = new WeightedSoundObject[]
             {
                 new WeightedSoundObject()
                 {
-                    selection = ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "fart06.mp3"), "Vfx_Fart", SoundType.Voice, Color.white),
+                    selection = ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "fart06.mp3"), "Vfx_Fart", SoundType.Voice, Color.white),
                     weight = 200
                 },
                 new WeightedSoundObject()
                 {
-                    selection = ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "fart07.mp3"), "Vfx_Fart", SoundType.Voice, Color.white),
+                    selection = ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "fart07.mp3"), "Vfx_Fart", SoundType.Voice, Color.white),
                     weight = 50
                 }
             };
 
-            gunShoot = ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "shoot.mp3"), "Vfx_Shoot", SoundType.Effect, Color.white);
+            gunShoot = ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "shoot.mp3"), "Vfx_Shoot", SoundType.Effect, Color.white);
 
-            RaldiDrip = AssetManager.SpriteFromTexture2D(AssetManager.TextureFromMod(this, "Sprites", "Raldi_Drip.png"), Vector2.one / 2f, 32f);
+            RaldiDrip = AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Sprites", "Raldi_Drip.png"), Vector2.one / 2f, 32f);
 
-            CrackElevatorMusic = AssetManager.MidiFromFile(Path.Combine(AssetManager.GetModPath(this), "Music", "raldiElevator.mid"), "crack_elevator");
+            CrackElevatorMusic = AssetLoader.MidiFromFile(Path.Combine(AssetLoader.GetModPath(this), "Music", "raldiElevator.mid"), "crack_elevator");
 
             CrackMusic = ScriptableObject.CreateInstance<LoopingSoundObject>();
             CrackMusic.clips = new AudioClip[]
             {
-                AssetManager.AudioClipFromMod(this, "Music", "mus_Crackhouse.mp3")
+                AssetLoader.AudioClipFromMod(this, "Music", "mus_Crackhouse.mp3")
             };
             CrackMusic.name = "CrackhouseSong";
             CrackMusic.mixer = Resources.FindObjectsOfTypeAll<AudioMixerGroup>().Where(x => x.name == "MIDI").First();
@@ -153,8 +151,8 @@ namespace RaldiCrackhousePlus
             CrackEscapeMusic = ScriptableObject.CreateInstance<LoopingSoundObject>();
             CrackEscapeMusic.clips = new AudioClip[]
             {
-                AssetManager.AudioClipFromMod(this, "Music", "mus_escapeintro.mp3"),
-                AssetManager.AudioClipFromMod(this, "Music", "mus_escapeloop.mp3")
+                AssetLoader.AudioClipFromMod(this, "Music", "mus_escapeintro.mp3"),
+                AssetLoader.AudioClipFromMod(this, "Music", "mus_escapeloop.mp3")
             };
             CrackEscapeMusic.name = "CrackhouseSong";
             CrackEscapeMusic.mixer = Resources.FindObjectsOfTypeAll<AudioMixerGroup>().Where(x => x.name == "MIDI").First();
@@ -163,66 +161,66 @@ namespace RaldiCrackhousePlus
 
             for (int i = 0; i < 187; i++)
             {
-                RaldiDance.Add(AssetManager.SpriteFromTexture2D(AssetManager.TextureFromMod(this, "Sprites", "RaldiDance", String.Format("frame_{0}_delay-0.07s.png",i.ToString("000"))),Vector2.one / 2f, 32f));
+                RaldiDance.Add(AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Sprites", "RaldiDance", String.Format("frame_{0}_delay-0.07s.png",i.ToString("000"))),Vector2.one / 2f, 32f));
             }
             for (int i = 0; i < 88; i++)
             {
-                MorshuSprites.Add(AssetManager.SpriteFromTexture2D(AssetManager.TextureFromMod(this, "Sprites", "Morshu", "Intro", String.Format("Frame {0}.png", (i + 1).ToString())), Vector2.one / 2f, 1f));
+                MorshuSprites.Add(AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Sprites", "Morshu", "Intro", String.Format("Frame {0}.png", (i + 1).ToString())), Vector2.one / 2f, 1f));
             }
             for (int i = 0; i < 70; i++)
             {
-                MorshuSpritesReject.Add(AssetManager.SpriteFromTexture2D(AssetManager.TextureFromMod(this, "Sprites", "Morshu", "Reject", String.Format("Frame {0}.png", (i + 1).ToString())), Vector2.one / 2f, 1f));
+                MorshuSpritesReject.Add(AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Sprites", "Morshu", "Reject", String.Format("Frame {0}.png", (i + 1).ToString())), Vector2.one / 2f, 1f));
             }
             
 
-            MorshuVoicelines.Add("intro", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "morshustore.wav"), "Vfx_Morshu_Intro", SoundType.Voice, new Color(220f/255f,67/255f,16/255f)));
-            MorshuVoicelines.Add("reject", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "morshureject.wav"), "Vfx_Morshu_MmmmRicher", SoundType.Voice, new Color(220f / 255f, 67 / 255f, 16 / 255f)));
-            MorshuVoicelines.Add("mmm", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "morshummm.wav"), "Vfx_Morshu_Mmmm", SoundType.Voice, new Color(220f / 255f, 67 / 255f, 16 / 255f)));
+            assetMan.Add("morshu_intro", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "morshustore.wav"), "Vfx_Morshu_Intro", SoundType.Voice, new Color(220f/255f,67/255f,16/255f)));
+            assetMan.Add("morshu_reject", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "morshureject.wav"), "Vfx_Morshu_MmmmRicher", SoundType.Voice, new Color(220f / 255f, 67 / 255f, 16 / 255f)));
+            assetMan.Add("morshu_mmm", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "morshummm.wav"), "Vfx_Morshu_Mmmm", SoundType.Voice, new Color(220f / 255f, 67 / 255f, 16 / 255f)));
             // british bloke
-            BritishVoicelines.Add("giveme", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "BritishBloke", "blo_sweet.wav"), "Vfx_Bully_TakeCandy", SoundType.Voice, new Color(89f / 255f, 81f / 255f, 107f / 255f)));
-            BritishVoicelines.Add("nopass", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "BritishBloke", "blo_chance.wav"), "Vfx_Bully_NoItems", SoundType.Voice, new Color(89f / 255f, 81f / 255f, 107f / 255f)));
-            BritishVoicelines.Add("thanks", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "BritishBloke", "blo_thanks.wav"), "Vfx_Bully_Donation", SoundType.Voice, new Color(89f / 255f, 81f / 255f, 107f / 255f)));
-            BritishVoicelines.Add("bored", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "BritishBloke", "blo_hmm.wav"), "Vfx_Bully_Bored", SoundType.Voice, new Color(89f / 255f, 81f / 255f, 107f / 255f)));
+            assetMan.Add("british_giveme", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "BritishBloke", "blo_sweet.wav"), "Vfx_Bully_TakeCandy", SoundType.Voice, new Color(89f / 255f, 81f / 255f, 107f / 255f)));
+            assetMan.Add("british_nopass", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "BritishBloke", "blo_chance.wav"), "Vfx_Bully_NoItems", SoundType.Voice, new Color(89f / 255f, 81f / 255f, 107f / 255f)));
+            assetMan.Add("british_thanks", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "BritishBloke", "blo_thanks.wav"), "Vfx_Bully_Donation", SoundType.Voice, new Color(89f / 255f, 81f / 255f, 107f / 255f)));
+            assetMan.Add("british_bored", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "BritishBloke", "blo_hmm.wav"), "Vfx_Bully_Bored", SoundType.Voice, new Color(89f / 255f, 81f / 255f, 107f / 255f)));
             // chipfloke
-            ChipflokeVoicelines.Add("10", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_10.wav"), "Vfx_PRI_10", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
-            ChipflokeVoicelines.Add("15", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_15.wav"), "Vfx_PRI_15", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
-            ChipflokeVoicelines.Add("20", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_20.wav"), "Vfx_PRI_30", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
-            ChipflokeVoicelines.Add("30", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_30.wav"), "Vfx_PRI_30", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
-            ChipflokeVoicelines.Add("45", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_45.wav"), "Vfx_PRI_45", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
-            ChipflokeVoicelines.Add("60", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_60.wav"), "Vfx_PRI_60", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
-            ChipflokeVoicelines.Add("99", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_99.wav"), "Vfx_PRI_99", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
-            ChipflokeVoicelines.Add("running", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_running.wav"), "Vfx_PRI_NoRunning", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
-            ChipflokeVoicelines.Add("drinking", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_drinking.wav"), "Vfx_PRI_NoDrinking", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
-            ChipflokeVoicelines.Add("bullying", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_bullying.wav"), "Vfx_PRI_NoBullying", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
-            ChipflokeVoicelines.Add("lockers", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_lockers.wav"), "Vfx_PRI_NoLockers", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
-            ChipflokeVoicelines.Add("escaping", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_escape.wav"), "Vfx_PRI_NoEscaping", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
-            ChipflokeVoicelines.Add("faculty", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_faculty.wav"), "Vfx_PRI_NoFaculty", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
-            ChipflokeVoicelines.Add("afterhours", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_afterhours.wav"), "Vfx_PRI_NoAfterHours", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
-            ChipflokeVoicelines.Add("whistle", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_whistle.wav"), "Vfx_PRI_Whistle", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
-            ChipflokeVoicelines.Add("jailtime", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_jailtime.wav"), "Vfx_PRI_Detention", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
-            ChipflokeVoicelines.Add("coming", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_coming.wav"), "Vfx_PRI_Coming", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
-            ChipflokeVoicelines.Add("scold1", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_knowbetter.wav"), "Vfx_PRI_Scold1", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
-            ChipflokeVoicelines.Add("scold2", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_scold02.wav"), "Vfx_PRI_Scold2", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
-            ChipflokeVoicelines.Add("scold3", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_scold03.wav"), "Vfx_PRI_Scold3", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
-            ChipflokeVoicelines.Add("scold4", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_scold03.wav"), "Vfx_PRI_Scold4", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            assetMan.Add("chipfloke_10", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_10.wav"), "Vfx_PRI_10", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            assetMan.Add("chipfloke_15", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_15.wav"), "Vfx_PRI_15", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            assetMan.Add("chipfloke_20", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_20.wav"), "Vfx_PRI_30", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            assetMan.Add("chipfloke_30", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_30.wav"), "Vfx_PRI_30", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            assetMan.Add("chipfloke_45", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_45.wav"), "Vfx_PRI_45", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            assetMan.Add("chipfloke_60", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_60.wav"), "Vfx_PRI_60", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            assetMan.Add("chipfloke_99", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_99.wav"), "Vfx_PRI_99", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            assetMan.Add("chipfloke_running", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_running.wav"), "Vfx_PRI_NoRunning", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            assetMan.Add("chipfloke_drinking", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_drinking.wav"), "Vfx_PRI_NoDrinking", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            assetMan.Add("chipfloke_bullying", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_bullying.wav"), "Vfx_PRI_NoBullying", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            assetMan.Add("chipfloke_lockers", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_lockers.wav"), "Vfx_PRI_NoLockers", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            assetMan.Add("chipfloke_escaping", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_escape.wav"), "Vfx_PRI_NoEscaping", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            assetMan.Add("chipfloke_faculty", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_faculty.wav"), "Vfx_PRI_NoFaculty", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            assetMan.Add("chipfloke_afterhours", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_afterhours.wav"), "Vfx_PRI_NoAfterHours", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            assetMan.Add("chipfloke_whistle", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_whistle.wav"), "Vfx_PRI_Whistle", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            assetMan.Add("chipfloke_jailtime", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_jailtime.wav"), "Vfx_PRI_Detention", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            assetMan.Add("chipfloke_coming", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_coming.wav"), "Vfx_PRI_Coming", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            assetMan.Add("chipfloke_scold1", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_knowbetter.wav"), "Vfx_PRI_Scold1", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            assetMan.Add("chipfloke_scold2", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_scold02.wav"), "Vfx_PRI_Scold2", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            assetMan.Add("chipfloke_scold3", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_scold03.wav"), "Vfx_PRI_Scold3", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
+            assetMan.Add("chipfloke_scold4", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "Chipfloke", "chip_scold03.wav"), "Vfx_PRI_Scold4", SoundType.Voice, new Color(133f / 255f, 79f / 255f, 63f / 255f)));
             // van man
-            VanManVoicelines.Add("1", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "VanMan", "van_1.wav"), "Vfx_Playtime_1", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
-            VanManVoicelines.Add("2", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "VanMan", "van_2.wav"), "Vfx_Playtime_2", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
-            VanManVoicelines.Add("3", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "VanMan", "van_3.wav"), "Vfx_Playtime_3", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
-            VanManVoicelines.Add("4", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "VanMan", "van_4.wav"), "Vfx_Playtime_4", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
-            VanManVoicelines.Add("5", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "VanMan", "van_5.wav"), "Vfx_Playtime_5", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
-            VanManVoicelines.Add("6", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "VanMan", "van_6.wav"), "Vfx_Playtime_6", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
-            VanManVoicelines.Add("7", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "VanMan", "van_7.wav"), "Vfx_Playtime_7", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
-            VanManVoicelines.Add("8", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "VanMan", "van_8.wav"), "Vfx_Playtime_8", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
-            VanManVoicelines.Add("9", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "VanMan", "van_9.wav"), "Vfx_Playtime_9", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
-            VanManVoicelines.Add("laugh", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "VanMan", "van_laugh.wav"), "Vfx_Playtime_Laugh", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
-            VanManVoicelines.Add("letsplay", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "VanMan", "van_play.wav"), "Vfx_Playtime_LetsPlay", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
-            VanManVoicelines.Add("thefuck", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "VanMan", "van_thefuck.wav"), "Vfx_Playtime_Sad", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
-            VanManVoicelines.Add("kidnap", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "VanMan", "van_kidnap.wav"), "Vfx_Playtime_Oops", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
-            VanManVoicelines.Add("readygo", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "VanMan", "van_go.wav"), "Vfx_Playtime_ReadyGo", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
-            VanManVoicelines.Add("congrats", ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(this, "Sounds", "VanMan", "van_finish.wav"), "Vfx_Playtime_Congrats", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
+            assetMan.Add("vanman_1", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "VanMan", "van_1.wav"), "Vfx_Playtime_1", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
+            assetMan.Add("vanman_2", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "VanMan", "van_2.wav"), "Vfx_Playtime_2", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
+            assetMan.Add("vanman_3", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "VanMan", "van_3.wav"), "Vfx_Playtime_3", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
+            assetMan.Add("vanman_4", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "VanMan", "van_4.wav"), "Vfx_Playtime_4", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
+            assetMan.Add("vanman_5", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "VanMan", "van_5.wav"), "Vfx_Playtime_5", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
+            assetMan.Add("vanman_6", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "VanMan", "van_6.wav"), "Vfx_Playtime_6", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
+            assetMan.Add("vanman_7", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "VanMan", "van_7.wav"), "Vfx_Playtime_7", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
+            assetMan.Add("vanman_8", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "VanMan", "van_8.wav"), "Vfx_Playtime_8", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
+            assetMan.Add("vanman_9", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "VanMan", "van_9.wav"), "Vfx_Playtime_9", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
+            assetMan.Add("vanman_laugh", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "VanMan", "van_laugh.wav"), "Vfx_Playtime_Laugh", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
+            assetMan.Add("vanman_letsplay", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "VanMan", "van_play.wav"), "Vfx_Playtime_LetsPlay", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
+            assetMan.Add("vanman_thefuck", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "VanMan", "van_thefuck.wav"), "Vfx_Playtime_Sad", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
+            assetMan.Add("vanman_kidnap", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "VanMan", "van_kidnap.wav"), "Vfx_Playtime_Oops", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
+            assetMan.Add("vanman_readygo", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "VanMan", "van_go.wav"), "Vfx_Playtime_ReadyGo", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
+            assetMan.Add("vanman_congrats", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "VanMan", "van_finish.wav"), "Vfx_Playtime_Congrats", SoundType.Voice, new Color(145f / 255f, 49f / 255f, 72f / 255f)));
 
-            posterPath = Path.Combine(AssetManager.GetModPath(this), "Textures", "Posters");
+            posterPath = Path.Combine(AssetLoader.GetModPath(this), "Textures", "Posters");
             AddPoster(100, "Poster_ChipRules01");
             AddPoster(60, "Poster_ChipRules02");
             AddPoster(60, "Poster_Confusing");
@@ -250,16 +248,16 @@ namespace RaldiCrackhousePlus
             AddPoster(10, "Poster_Beast06");
             AddPoster(10, "Poster_Beast07");
             AddPoster(60, "Poster_AddMe");
-            itemPath = Path.Combine(AssetManager.GetModPath(this), "Sprites", "Items");
+            itemPath = Path.Combine(AssetLoader.GetModPath(this), "Sprites", "Items");
             CreateItem<ITM_15SecondEnergy>("15Energy","Itm_15Energy", "Desc_15Energy", "Energy", 65, 45);
             CreateItem<ITM_JailFreeCard>("JailFree", "Itm_JailFree", "Desc_JailFree", "Card", 80, 55);
             CreateItem<ITM_Acceptable>("HalfDollar", "Half Dollar(YOU ARENT SUPPOSED TO HAVE THIS)", "stop hacking.", "HalfDollar", 6900, 6900); //FOR INTERNAL USE WITH QUARTERPOUCH ONLY!
 
-            chipflokeSprite = AssetManager.SpriteFromTexture2D(AssetManager.TextureFromMod(this, "Sprites", "Chipfloke.png"), Vector2.one / 2f, 65f);
-            cobblestoneWall = AssetManager.TextureFromMod(this, "Textures", "Cobblestone.png");
+            chipflokeSprite = AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Sprites", "Chipfloke.png"), Vector2.one / 2f, 65f);
+            cobblestoneWall = AssetLoader.TextureFromMod(this, "Textures", "Cobblestone.png");
             for (int i = 0; i < 8; i++)
             {
-                vanManSprites[i] = AssetManager.SpriteFromTexture2D(AssetManager.TextureFromMod(this, "Sprites", "VanMan", String.Format("{0}.png", i.ToString())), new Vector2(0.5f,0.4f), 34f);
+                vanManSprites[i] = AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Sprites", "VanMan", String.Format("{0}.png", i.ToString())), new Vector2(0.5f,0.4f), 34f);
             }
 
             GeneratorManagement.Register(this, GenerationModType.Addend, (string floorName, int floorId, LevelObject obj) =>
@@ -336,7 +334,7 @@ namespace RaldiCrackhousePlus
             {
                 new WeightedSoundObject()
                 {
-                    selection=RaldiPlugin.RaldiVoicelines["praise1"],
+                    selection=RaldiPlugin.assetMan.Get<SoundObject>("raldi_praise1"),
                     weight=100,
                 }
             });
@@ -379,8 +377,8 @@ namespace RaldiCrackhousePlus
             FieldInfo speed = AccessTools.Field(typeof(GottaSweep),"speed");
             FieldInfo audIntro = AccessTools.Field(typeof(GottaSweep), "audIntro");
             FieldInfo audSweep = AccessTools.Field(typeof(GottaSweep), "audSweep");
-            SoundObject gwIntro = ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(RaldiPlugin.Instance, "Sounds", "gw_weepingtime.mp3"), "Vfx_GottaWeep_Intro", SoundType.Voice, Color.gray);
-            SoundObject gwSweep = ObjectCreatorHandlers.CreateSoundObject(AssetManager.AudioClipFromMod(RaldiPlugin.Instance, "Sounds", "gw_intro.mp3"), "Vfx_GottaWeep_Sweep", SoundType.Voice, Color.gray);
+            SoundObject gwIntro = ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(RaldiPlugin.Instance, "Sounds", "gw_weepingtime.mp3"), "Vfx_GottaWeep_Intro", SoundType.Voice, Color.gray);
+            SoundObject gwSweep = ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(RaldiPlugin.Instance, "Sounds", "gw_intro.mp3"), "Vfx_GottaWeep_Sweep", SoundType.Voice, Color.gray);
             Resources.FindObjectsOfTypeAll<GottaSweep>().Do(x =>
             {
                 audIntro.SetValue(x, gwIntro);
@@ -392,46 +390,21 @@ namespace RaldiCrackhousePlus
                 x.ReflectionSetVariable("audSpit", RaldiPlugin.gunShoot);
                 //x.gum.ReflectionSetVariable("speed", ((float)x.gum.ReflectionGetVariable("speed")) * 2f);
             });
-            AssetManager.ReplaceAllTexturesFromFolder(Path.Combine(AssetManager.GetModPath(RaldiPlugin.Instance), "TextureReplacements"));
+            AssetLoader.ReplaceAllTexturesFromFolder(Path.Combine(AssetLoader.GetModPath(RaldiPlugin.Instance), "TextureReplacements"));
 
             Material[] mats = Resources.FindObjectsOfTypeAll<Material>();
 
-            WindowObject winTemplate = Resources.FindObjectsOfTypeAll<WindowObject>().Where(x => x.name == "WoodWindow").First();
-
-            RaldiPlugin.JailWindowObject = ScriptableObject.CreateInstance<WindowObject>();
-            RaldiPlugin.JailWindowObject.name = "Jail Window";
-            Material maskMat = new Material(winTemplate.mask);
-            maskMat.SetTexture("_Mask",AssetManager.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailWindowMask.png"));
-            RaldiPlugin.JailWindowObject.mask = maskMat;
-            Material windowMat = new Material(winTemplate.overlay.First());
-            windowMat.SetTexture("_MainTex", AssetManager.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailWindow.png"));
-            RaldiPlugin.JailWindowObject.overlay = new Material[] { windowMat, windowMat };
-            Material openMat = new Material(winTemplate.open.First());
-            openMat.SetTexture("_MainTex", AssetManager.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailWindowBreak.png"));
-            RaldiPlugin.JailWindowObject.open = new Material[] { openMat, openMat };
-            RaldiPlugin.JailWindowObject.windowPre = winTemplate.windowPre;
+            RaldiPlugin.JailWindowObject = ObjectCreators.CreateWindowObject("Jail Window", AssetLoader.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailWindow.png"), AssetLoader.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailWindowBreak.png"), AssetLoader.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailWindowMask.png"));
 
             StandardDoorMats templateDoorMat = Resources.FindObjectsOfTypeAll<StandardDoorMats>().Where(x => x.name == "ClassDoorSet").First();
-            RaldiPlugin.JailDoorObject = ScriptableObject.CreateInstance<StandardDoorMats>();
-            RaldiPlugin.JailDoorObject.name = "JailDoor";
-            Material doorOpenMat = new Material(templateDoorMat.open);
-            doorOpenMat.SetTexture("_MainTex", AssetManager.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailDoorOpened.png"));
-            RaldiPlugin.JailDoorObject.open = doorOpenMat;
-            Material doorClosedMat = new Material(templateDoorMat.shut);
-            doorClosedMat.SetTexture("_MainTex", AssetManager.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailDoorClosed.png"));
-            RaldiPlugin.JailDoorObject.shut = doorClosedMat;
-            Texture2D doorMask = AssetManager.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailDoorMask.png");
-            Material doorMaskMat = new Material(mats.Where(x => x.name == "DoorMask").First());
-            doorMaskMat.SetTexture("_MainTex", doorMask);
-            doorMaskMat.SetTexture("_Mask", doorMask);
-            RaldiPlugin.JailDoorMask = doorMaskMat;
+            RaldiPlugin.JailDoorObject = ObjectCreators.CreateDoorDataObject("Jail Door", AssetLoader.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailDoorOpened.png"), AssetLoader.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailDoorClosed.png"), AssetLoader.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailDoorMask.png"));
 
             RaldiPlugin.Instance.CreateMachineMats(mats, "15Energy", "Machine_Energy");
 
             RaldiPlugin.detentionUI = Resources.FindObjectsOfTypeAll<DetentionUi>().First();
             // dear mystman12: what the fuck. why isnt this localized. why is this like this at all.
             RaldiPlugin.detentionUI.transform.Find("MainText").gameObject.GetComponent<TMP_Text>().text = "Jail time!\n\r  seconds remain.";
-            //Graphics.CopyTexture(AssetManager.TextureFromMod(RaldiPlugin.Instance, "test.png"), Resources.FindObjectsOfTypeAll<Texture2D>().Where(x => x.name == "Tubes (3)").First());
+            //Graphics.CopyTexture(AssetLoader.TextureFromMod(RaldiPlugin.Instance, "test.png"), Resources.FindObjectsOfTypeAll<Texture2D>().Where(x => x.name == "Tubes (3)").First());
         }
     }
 }

@@ -29,7 +29,7 @@ namespace RaldiCrackhousePlus
             base.PlayerInSight(player);
             if (aggroed && !oldAggroed)
             {
-                AudMan.PlaySingle(RaldiPlugin.RaldiVoicelines["seeplayer"]);
+                AudMan.PlaySingle(RaldiPlugin.assetMan.Get<SoundObject>("raldi_seeplayer"));
             }
         }
 
