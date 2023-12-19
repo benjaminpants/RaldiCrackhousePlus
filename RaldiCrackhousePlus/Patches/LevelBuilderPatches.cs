@@ -15,7 +15,7 @@ namespace RaldiCrackhousePlus.Patches
         {
             if (room.category == RoomCategory.Office)
             {
-                wallTex = RaldiPlugin.cobblestoneWall;
+                wallTex = RaldiPlugin.assetMan.Get<Texture2D>("cobblewall");
             }
         }
     }

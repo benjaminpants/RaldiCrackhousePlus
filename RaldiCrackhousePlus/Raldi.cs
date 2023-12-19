@@ -44,7 +44,7 @@ namespace RaldiCrackhousePlus
             StopAllCoroutines();
             inDripMode = true;
             ((Animator)animatorReflect.GetValue(this)).enabled = false; //i hope you DIE in a FIRE!
-            spriteRenderer[0].sprite = RaldiPlugin.RaldiDrip;
+            spriteRenderer[0].sprite = RaldiPlugin.assetMan.Get<Sprite>("raldi");
             countWhenDripMode = Singleton<BaseGameManager>.Instance.FoundNotebooks;
             StopAllCoroutines();
         }

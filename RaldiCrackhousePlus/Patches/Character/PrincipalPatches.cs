@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using UnityEngine;
 
 namespace RaldiCrackhousePlus.Patches.Character
 {
@@ -77,7 +78,7 @@ namespace RaldiCrackhousePlus.Patches.Character
                 RaldiPlugin.assetMan.Get<SoundObject>("chipfloke_scold3"),
                 RaldiPlugin.assetMan.Get<SoundObject>("chipfloke_scold4"),
             };
-            __instance.spriteRenderer[0].sprite = RaldiPlugin.chipflokeSprite;
+            __instance.spriteRenderer[0].sprite = RaldiPlugin.assetMan.Get<Sprite>("chipfloke");
         }
     }
 

@@ -18,7 +18,6 @@ using TMPro;
 
 namespace RaldiCrackhousePlus
 {
-    [BepInDependency("net.Fasguy.BepInHelper")]
     [BepInDependency("mtm101.rulerp.baldiplus.quarterpouch")]
     [BepInDependency("mtm101.rulerp.bbplus.baldidevapi")]
     [BepInPlugin("mtm101.rulerp.baldiplus.crackhouseplus", "Raldi's Crackhouse Plus", "0.0.0.0")]
@@ -35,8 +34,6 @@ namespace RaldiCrackhousePlus
         public static List<Sprite> RaldiDance = new List<Sprite>(); //oh god.
         public static List<Sprite> MorshuSprites = new List<Sprite>(); //lamp oil, rope? bombs
         public static List<Sprite> MorshuSpritesReject = new List<Sprite>(); //MMMM Richer!
-        //public static List<Sprite> RaldiSlap = new List<Sprite>();
-        public static Sprite RaldiDrip;
         public static LoopingSoundObject CrackMusic;
         public static LoopingSoundObject CrackEscapeMusic;
         public static string CrackElevatorMusic;
@@ -46,8 +43,6 @@ namespace RaldiCrackhousePlus
         public static Sprite[] vanManSprites = new Sprite[8];
         public static DetentionUi detentionUI;
 
-        public static Sprite chipflokeSprite;
-        public static Texture2D cobblestoneWall;
         public static WindowObject JailWindowObject;
         public static StandardDoorMats JailDoorObject;
         public static Material JailDoorMask;
@@ -80,7 +75,7 @@ namespace RaldiCrackhousePlus
             SodaMachineMaterials.Add(itemName, new Material[] { fullMat, outMat });
         }
 
-        ItemObject CreateItem<T>(string nameInternal, string nameDisplay, string description, string sprite, int price, int genCost) where T : Item
+        ItemObject CreateItem<T>(string nameInternal, string nameDisplay, string description, string sprite, int price, int genCost, ItemFlags flags, params string[] tags) where T : Item
         {
             ItemObject obj = ObjectCreators.CreateItemObject(nameDisplay, 
                 description, 
@@ -94,6 +89,10 @@ namespace RaldiCrackhousePlus
             obj.item.name = nameInternal + "Object";
             DontDestroyOnLoad(obj.item);
             items.Add(nameInternal,obj);
+            ItemMetaData meta = new ItemMetaData(this.Info, obj);
+            meta.flags = flags;
+            meta.tags.AddRange(tags);
+            ItemMetaStorage.Instance.Add(meta);
             return obj;
         }
 
@@ -136,7 +135,7 @@ namespace RaldiCrackhousePlus
 
             gunShoot = ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(this, "Sounds", "shoot.mp3"), "Vfx_Shoot", SoundType.Effect, Color.white);
 
-            RaldiDrip = AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Sprites", "Raldi_Drip.png"), Vector2.one / 2f, 32f);
+            assetMan.Add("raldi", AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Sprites", "Raldi_Drip.png"), Vector2.one / 2f, 32f));
 
             CrackElevatorMusic = AssetLoader.MidiFromFile(Path.Combine(AssetLoader.GetModPath(this), "Music", "raldiElevator.mid"), "crack_elevator");
 
@@ -248,13 +247,9 @@ namespace RaldiCrackhousePlus
             AddPoster(10, "Poster_Beast06");
             AddPoster(10, "Poster_Beast07");
             AddPoster(60, "Poster_AddMe");
-            itemPath = Path.Combine(AssetLoader.GetModPath(this), "Sprites", "Items");
-            CreateItem<ITM_15SecondEnergy>("15Energy","Itm_15Energy", "Desc_15Energy", "Energy", 65, 45);
-            CreateItem<ITM_JailFreeCard>("JailFree", "Itm_JailFree", "Desc_JailFree", "Card", 80, 55);
-            CreateItem<ITM_Acceptable>("HalfDollar", "Half Dollar(YOU ARENT SUPPOSED TO HAVE THIS)", "stop hacking.", "HalfDollar", 6900, 6900); //FOR INTERNAL USE WITH QUARTERPOUCH ONLY!
 
-            chipflokeSprite = AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Sprites", "Chipfloke.png"), Vector2.one / 2f, 65f);
-            cobblestoneWall = AssetLoader.TextureFromMod(this, "Textures", "Cobblestone.png");
+            assetMan.Add("chipfloke", AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Sprites", "Chipfloke.png"), Vector2.one / 2f, 65f));
+            assetMan.Add("cobblewall", AssetLoader.TextureFromMod(this, "Textures", "Cobblestone.png"));
             for (int i = 0; i < 8; i++)
             {
                 vanManSprites[i] = AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(this, "Sprites", "VanMan", String.Format("{0}.png", i.ToString())), new Vector2(0.5f,0.4f), 34f);
@@ -319,6 +314,56 @@ namespace RaldiCrackhousePlus
                 obj.MarkAsNeverUnload();
             });
             MTM101BaldiDevAPI.SavesEnabled = false;
+
+            LoadingEvents.RegisterOnAssetsLoaded(() =>
+            {
+                itemPath = Path.Combine(AssetLoader.GetModPath(this), "Sprites", "Items");
+                CreateItem<ITM_15SecondEnergy>("15Energy", "Itm_15Energy", "Desc_15Energy", "Energy", 65, 45, ItemFlags.Persists, "food");
+                CreateItem<ITM_JailFreeCard>("JailFree", "Itm_JailFree", "Desc_JailFree", "Card", 80, 55, ItemFlags.None);
+                CreateItem<ITM_Acceptable>("HalfDollar", "Half Dollar(YOU ARENT SUPPOSED TO HAVE THIS)", "stop hacking.", "HalfDollar", 6900, 6900, ItemFlags.NoInventory); //FOR INTERNAL USE WITH QUARTERPOUCH ONLY!
+                RaldiPlugin.items["HalfDollar"].item.ReflectionSetVariable("audUse", Resources.FindObjectsOfTypeAll<SoundObject>().Where(x => x.name == "CoinDrop").First());
+                Baldi[] Baldis = Resources.FindObjectsOfTypeAll<Baldi>().Where(x => x.GetType() == typeof(Baldi)).ToArray();
+                for (int i = 0; i < Baldis.Length; i++)
+                {
+                    RaldiPlugin.TransformIntoRaldi(Baldis[i]);
+                }
+                FieldInfo speed = AccessTools.Field(typeof(GottaSweep), "speed");
+                FieldInfo audIntro = AccessTools.Field(typeof(GottaSweep), "audIntro");
+                FieldInfo audSweep = AccessTools.Field(typeof(GottaSweep), "audSweep");
+                SoundObject gwIntro = ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(RaldiPlugin.Instance, "Sounds", "gw_weepingtime.mp3"), "Vfx_GottaWeep_Intro", SoundType.Voice, Color.gray);
+                SoundObject gwSweep = ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(RaldiPlugin.Instance, "Sounds", "gw_intro.mp3"), "Vfx_GottaWeep_Sweep", SoundType.Voice, Color.gray);
+                Resources.FindObjectsOfTypeAll<GottaSweep>().Do(x =>
+                {
+                    audIntro.SetValue(x, gwIntro);
+                    audSweep.SetValue(x, gwSweep);
+                    speed.SetValue(x, ((float)speed.GetValue(x)) / 5f);
+                });
+                Resources.FindObjectsOfTypeAll<Beans>().Do(x =>
+                {
+                    x.ReflectionSetVariable("audSpit", RaldiPlugin.gunShoot);
+                    //x.gum.ReflectionSetVariable("speed", ((float)x.gum.ReflectionGetVariable("speed")) * 2f);
+                });
+                AssetLoader.ReplaceAllTexturesFromFolder(Path.Combine(AssetLoader.GetModPath(RaldiPlugin.Instance), "TextureReplacements"));
+
+                Material[] mats = Resources.FindObjectsOfTypeAll<Material>();
+
+                RaldiPlugin.JailWindowObject = ObjectCreators.CreateWindowObject("Jail Window", AssetLoader.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailWindow.png"), AssetLoader.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailWindowBreak.png"), AssetLoader.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailWindowMask.png"));
+
+                StandardDoorMats templateDoorMat = Resources.FindObjectsOfTypeAll<StandardDoorMats>().Where(x => x.name == "ClassDoorSet").First();
+                RaldiPlugin.JailDoorObject = ObjectCreators.CreateDoorDataObject("Jail Door", AssetLoader.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailDoorOpened.png"), AssetLoader.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailDoorClosed.png"));
+                Texture2D doorMask = AssetLoader.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailDoorMask.png");
+                Material doorMaskMat = new Material(mats.Where(x => x.name == "DoorMask").First());
+                doorMaskMat.SetTexture("_MainTex", doorMask);
+                doorMaskMat.SetTexture("_Mask", doorMask);
+                RaldiPlugin.JailDoorMask = doorMaskMat;
+
+                RaldiPlugin.Instance.CreateMachineMats(mats, "15Energy", "Machine_Energy");
+
+                RaldiPlugin.detentionUI = Resources.FindObjectsOfTypeAll<DetentionUi>().First();
+                // dear mystman12: what the fuck. why isnt this localized. why is this like this at all.
+                RaldiPlugin.detentionUI.transform.Find("MainText").gameObject.GetComponent<TMP_Text>().text = "Jail time!\n\r  seconds remain.";
+                //Graphics.CopyTexture(AssetLoader.TextureFromMod(RaldiPlugin.Instance, "test.png"), Resources.FindObjectsOfTypeAll<Texture2D>().Where(x => x.name == "Tubes (3)").First());
+            }, false);
         }
 
         internal static void TransformIntoRaldi(Baldi b)
@@ -357,54 +402,11 @@ namespace RaldiCrackhousePlus
             r.ReflectionGetVariable("navigator").ReflectionSetVariable("npc", r);
             r.ReflectionGetVariable("looker").ReflectionSetVariable("npc", r);
             RaldiPlugin.Log.LogDebug("Transformed: " + b.gameObject.name + " into Raldi succesfully!");
+            Dictionary<string, NPC> dict = NPCMetaStorage.Instance.Get(Character.Baldi).prefabs;
+            dict.Remove(b.name);
+            NPCMetaStorage.Instance.AddPrefab(r);
             // unfortunately we have to keep baldi alive just for a bit longer...
             // GameObject.DestroyImmediate(b);
-        }
-    }
-
-    [HarmonyPatch(typeof(NameManager))]
-    [HarmonyPatch("Awake")]
-    class NameAwakePatch
-    {
-        static void Prefix()
-        {
-            RaldiPlugin.items["HalfDollar"].item.ReflectionSetVariable("audUse", Resources.FindObjectsOfTypeAll<SoundObject>().Where(x => x.name == "CoinDrop").First());
-            Baldi[] Baldis = Resources.FindObjectsOfTypeAll<Baldi>().Where(x => x.GetType() == typeof(Baldi)).ToArray();
-            for (int i = 0; i < Baldis.Length; i++)
-            {
-                RaldiPlugin.TransformIntoRaldi(Baldis[i]);
-            }
-            FieldInfo speed = AccessTools.Field(typeof(GottaSweep),"speed");
-            FieldInfo audIntro = AccessTools.Field(typeof(GottaSweep), "audIntro");
-            FieldInfo audSweep = AccessTools.Field(typeof(GottaSweep), "audSweep");
-            SoundObject gwIntro = ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(RaldiPlugin.Instance, "Sounds", "gw_weepingtime.mp3"), "Vfx_GottaWeep_Intro", SoundType.Voice, Color.gray);
-            SoundObject gwSweep = ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(RaldiPlugin.Instance, "Sounds", "gw_intro.mp3"), "Vfx_GottaWeep_Sweep", SoundType.Voice, Color.gray);
-            Resources.FindObjectsOfTypeAll<GottaSweep>().Do(x =>
-            {
-                audIntro.SetValue(x, gwIntro);
-                audSweep.SetValue(x, gwSweep);
-                speed.SetValue(x,((float)speed.GetValue(x)) / 5f);
-            });
-            Resources.FindObjectsOfTypeAll<Beans>().Do(x =>
-            {
-                x.ReflectionSetVariable("audSpit", RaldiPlugin.gunShoot);
-                //x.gum.ReflectionSetVariable("speed", ((float)x.gum.ReflectionGetVariable("speed")) * 2f);
-            });
-            AssetLoader.ReplaceAllTexturesFromFolder(Path.Combine(AssetLoader.GetModPath(RaldiPlugin.Instance), "TextureReplacements"));
-
-            Material[] mats = Resources.FindObjectsOfTypeAll<Material>();
-
-            RaldiPlugin.JailWindowObject = ObjectCreators.CreateWindowObject("Jail Window", AssetLoader.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailWindow.png"), AssetLoader.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailWindowBreak.png"), AssetLoader.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailWindowMask.png"));
-
-            StandardDoorMats templateDoorMat = Resources.FindObjectsOfTypeAll<StandardDoorMats>().Where(x => x.name == "ClassDoorSet").First();
-            RaldiPlugin.JailDoorObject = ObjectCreators.CreateDoorDataObject("Jail Door", AssetLoader.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailDoorOpened.png"), AssetLoader.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailDoorClosed.png"), AssetLoader.TextureFromMod(RaldiPlugin.Instance, "Textures", "JailDoorMask.png"));
-
-            RaldiPlugin.Instance.CreateMachineMats(mats, "15Energy", "Machine_Energy");
-
-            RaldiPlugin.detentionUI = Resources.FindObjectsOfTypeAll<DetentionUi>().First();
-            // dear mystman12: what the fuck. why isnt this localized. why is this like this at all.
-            RaldiPlugin.detentionUI.transform.Find("MainText").gameObject.GetComponent<TMP_Text>().text = "Jail time!\n\r  seconds remain.";
-            //Graphics.CopyTexture(AssetLoader.TextureFromMod(RaldiPlugin.Instance, "test.png"), Resources.FindObjectsOfTypeAll<Texture2D>().Where(x => x.name == "Tubes (3)").First());
         }
     }
 }
